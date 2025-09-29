@@ -102,6 +102,22 @@ The service will start on `http://localhost:8000`.
 - **ICD-11**: Integrates with WHO's International Classification of Diseases, 11th Revision.
 - **NAMASTE**: Supports National Ayush Morbidity and Standardized Terminologies of Ayurveda.
 
+## Usage
+
+### Setup
+1. Install dependencies: `uv sync`
+2. Seed the database: `uv run python seed.py`
+3. Run the server: `uv run fastapi dev app/main.py`
+
+### API Endpoints
+- `GET /codesystem/{id}`: Retrieve a CodeSystem (e.g., namaste, icd11)
+- `GET /conceptmap/{id}`: Retrieve a ConceptMap (e.g., namaste-to-icd11)
+- `GET /lookup?q={query}`: Search for codes in NAMASTE
+- `GET /translate?code={code}`: Translate code between systems
+- `POST /upload`: Upload FHIR Bundle
+
+All endpoints require `X-API-Key: secret-key` header.
+
 ## Security
 
 - All API endpoints require OAuth authentication.
