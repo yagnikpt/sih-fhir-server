@@ -46,16 +46,31 @@ async def get_conceptmap(id: str, db=Depends(get_db)):
 @router.get("/lookup", dependencies=[Depends(verify_api_key)])
 async def lookup(q: str, db=Depends(get_db)):
     collection = await get_codesystem_collection(db)
-    cs = await collection.find_one({"id": "namaste"})
-    if not cs:
-        raise HTTPException(status_code=404, detail="NAMASTE CodeSystem not found")
-    results = [
-        c
-        for c in cs["concept"]
-        if q.lower() in c["code"].lower()
-        or (c.get("display") and q.lower() in c["display"].lower())
-    ]
-    return {"results": results[:10]}  # Limit to 10
+    results = []
+
+    # Search NAMASTE codesystem
+    namaste_cs = await collection.find_one({"id": "namaste"})
+    if namaste_cs:
+        for c in namaste_cs["concept"]:
+            if q.lower() in c["code"].lower() or (
+                c.get("display") and q.lower() in c["display"].lower()
+            ):
+                result = c.copy()
+                result["system"] = "namaste"
+                results.append(result)
+
+    # Search ICD-11 codesystem
+    icd11_cs = await collection.find_one({"id": "icd11"})
+    if icd11_cs:
+        for c in icd11_cs["concept"]:
+            if q.lower() in c["code"].lower() or (
+                c.get("display") and q.lower() in c["display"].lower()
+            ):
+                result = c.copy()
+                result["system"] = "icd11"
+                results.append(result)
+
+    return {"results": results[:10]}
 
 
 @router.get("/translate", dependencies=[Depends(verify_api_key)])
